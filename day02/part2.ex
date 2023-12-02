@@ -16,9 +16,7 @@ defmodule M do
   def solve do
     IO.read(:stdio, :all)
     |> String.trim()
-    |> String.replace(":", "")
-    |> String.replace(";", "")
-    |> String.replace(",", "")
+    |> (fn s -> ":,;" |> String.split("") |> Enum.reduce(s, &String.replace(&2, &1, "")) end).()
     |> String.split("\n")
     |> Enum.map(&String.split(&1))
     |> Enum.map(&score(&1, %{}))
