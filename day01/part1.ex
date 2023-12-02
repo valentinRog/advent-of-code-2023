@@ -1,18 +1,18 @@
 defmodule M do
-  def first_digit(s) do
-    [head | tail] = String.graphemes(s)
+  defp first_digit(s) do
+    {head, tail} = String.split_at(s, 1)
 
     case Integer.parse(head) do
-      {x, ""} -> x
-      _ -> first_digit(Enum.join(tail))
+      {_, ""} -> head
+      _ -> first_digit(tail)
     end
   end
 
   def solve do
     IO.read(:stdio, :all)
     |> String.trim()
-    |> String.split()
-    |> Enum.map(&"#{first_digit(&1)}#{first_digit(String.reverse(&1))}")
+    |> String.split("\n")
+    |> Enum.map(&(first_digit(&1) <> first_digit(String.reverse(&1))))
     |> Enum.map(fn x ->
       {x, ""} = Integer.parse(x)
       x

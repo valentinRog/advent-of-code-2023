@@ -1,42 +1,40 @@
 defmodule M do
-  def first_digit(s) do
-    [head | tail] = String.graphemes(s)
+  defp first_digit(s, m) do
+    case Enum.find(Map.keys(m), &String.starts_with?(s, &1)) do
+      nil ->
+        {head, tail} = String.split_at(s, 1)
 
-    case Integer.parse(head) do
-      {x, ""} -> x
-      _ -> first_digit(Enum.join(tail))
+        case Integer.parse(head) do
+          :error -> first_digit(tail, m)
+          _ -> head
+        end
+
+      k ->
+        Map.get(m, k)
     end
   end
 
-  def place_after("", acc) do
-    acc
-  end
-
-  def place_after(s, acc) do
-    w =
-      cond do
-        String.starts_with?(s, "one") -> "1"
-        String.starts_with?(s, "two") -> "2"
-        String.starts_with?(s, "three") -> "3"
-        String.starts_with?(s, "four") -> "4"
-        String.starts_with?(s, "five") -> "5"
-        String.starts_with?(s, "six") -> "6"
-        String.starts_with?(s, "seven") -> "7"
-        String.starts_with?(s, "eight") -> "8"
-        String.starts_with?(s, "nine") -> "9"
-        true -> ""
-      end
-
-    [head | tail] = String.graphemes(s)
-    place_after(Enum.join(tail), acc <> w <> head)
-  end
-
   def solve do
+    m = %{
+      "one" => "1",
+      "two" => "2",
+      "three" => "3",
+      "four" => "4",
+      "five" => "5",
+      "six" => "6",
+      "seven" => "7",
+      "eight" => "8",
+      "nine" => "9"
+    }
+
+    mr = Enum.reduce(m, %{}, fn {k, v}, acc -> Map.put(acc, String.reverse(k), v) end)
+
+    first_digit(String.reverse("saluttwo5onetwo7ghj"), mr)
+
     IO.read(:stdio, :all)
     |> String.trim()
-    |> String.split()
-    |> Enum.map(&place_after(&1, ""))
-    |> Enum.map(&"#{first_digit(&1)}#{first_digit(String.reverse(&1))}")
+    |> String.split("\n")
+    |> Enum.map(&(first_digit(&1, m) <> first_digit(String.reverse(&1), mr)))
     |> Enum.map(fn x ->
       {x, ""} = Integer.parse(x)
       x
