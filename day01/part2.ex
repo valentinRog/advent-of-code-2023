@@ -29,8 +29,6 @@ defmodule M do
 
     mr = Enum.reduce(m, %{}, fn {k, v}, acc -> Map.put(acc, String.reverse(k), v) end)
 
-    first_digit(String.reverse("saluttwo5onetwo7ghj"), mr)
-
     IO.read(:stdio, :all)
     |> String.trim()
     |> String.split("\n")
