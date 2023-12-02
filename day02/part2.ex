@@ -1,15 +1,15 @@
 defmodule M do
-  defp valid(["Game", _ | tail], m) do
-    valid(tail, m)
+  defp score(["Game", _ | tail], m) do
+    score(tail, m)
   end
 
-  defp valid([a, b | tail], m) do
+  defp score([a, b | tail], m) do
     {n, ""} = Integer.parse(a)
     m = Map.put(m, b, max(n, Map.get(m, b, 0)))
-    valid(tail, m)
+    score(tail, m)
   end
 
-  defp valid([], m) do
+  defp score([], m) do
     Map.values(m) |> Enum.product()
   end
 
@@ -21,7 +21,7 @@ defmodule M do
     |> String.replace(",", "")
     |> String.split("\n")
     |> Enum.map(&String.split(&1))
-    |> Enum.map(&valid(&1, %{}))
+    |> Enum.map(&score(&1, %{}))
     |> Enum.sum()
   end
 end
