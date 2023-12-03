@@ -33,10 +33,7 @@ defmodule M do
     |> String.trim()
     |> String.split("\n")
     |> Enum.map(&(first_digit(&1, m) <> first_digit(String.reverse(&1), mr)))
-    |> Enum.map(fn x ->
-      {x, ""} = Integer.parse(x)
-      x
-    end)
+    |> Enum.map(&String.to_integer/1)
     |> Enum.sum()
   end
 end

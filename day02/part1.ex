@@ -1,23 +1,17 @@
 defmodule M do
-  defp valid(["Game", _ | tail]) do
-    valid(tail)
+  defp ok([n, c]) do
+    case c do
+      "red" -> n <= 12
+      "green" -> n <= 13
+      "blue" -> n <= 14
+    end
   end
 
-  defp valid([a, b | tail]) do
-    {n, ""} = Integer.parse(a)
-
-    max =
-      case b do
-        "red" -> 12
-        "green" -> 13
-        "blue" -> 14
-      end
-
-    n <= max and valid(tail)
-  end
-
-  defp valid([]) do
-    true
+  defp valid(l) do
+    Enum.drop(l, 2)
+    |> Enum.chunk_every(2)
+    |> Enum.map(fn [n, c] -> [String.to_integer(n), c] end)
+    |> Enum.all?(&ok/1)
   end
 
   def solve do
@@ -25,12 +19,9 @@ defmodule M do
     |> String.trim()
     |> (fn s -> ":,;" |> String.split("") |> Enum.reduce(s, &String.replace(&2, &1, "")) end).()
     |> String.split("\n")
-    |> Enum.map(&String.split(&1))
-    |> Enum.filter(&valid(&1))
-    |> Enum.map(fn [_, id | _] ->
-      {id, ""} = Integer.parse(id)
-      id
-    end)
+    |> Enum.map(&String.split/1)
+    |> Enum.filter(&valid/1)
+    |> Enum.map(fn [_, id | _] -> String.to_integer(id) end)
     |> Enum.sum()
   end
 end

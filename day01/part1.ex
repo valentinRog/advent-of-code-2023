@@ -3,8 +3,8 @@ defmodule M do
     {head, tail} = String.split_at(s, 1)
 
     case Integer.parse(head) do
-      {_, ""} -> head
-      _ -> first_digit(tail)
+      :error -> first_digit(tail)
+      _ -> head
     end
   end
 
@@ -13,10 +13,7 @@ defmodule M do
     |> String.trim()
     |> String.split("\n")
     |> Enum.map(&(first_digit(&1) <> first_digit(String.reverse(&1))))
-    |> Enum.map(fn x ->
-      {x, ""} = Integer.parse(x)
-      x
-    end)
+    |> Enum.map(&String.to_integer/1)
     |> Enum.sum()
   end
 end
