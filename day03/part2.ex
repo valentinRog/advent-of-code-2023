@@ -12,21 +12,7 @@ defmodule M do
     end
   end
 
-  defp valid?([], _), do: false
-
-  defp valid?([{{x, y}, _} | tail], symbols) do
-    [
-      {x, y - 1},
-      {x + 1, y - 1},
-      {x + 1, y},
-      {x + 1, y + 1},
-      {x, y + 1},
-      {x - 1, y + 1},
-      {x - 1, y},
-      {x - 1, y - 1}
-    ]
-    |> Enum.any?(fn p -> symbols |> MapSet.member?(p) end) or valid?(tail, symbols)
-  end
+  defp symbol_pos([], _), do: nil
 
   defp symbol_pos([{{x, y}, _} | tail], symbols) do
     p =
@@ -68,7 +54,6 @@ defmodule M do
       |> Enum.reduce(MapSet.new(), fn {k, _}, acc -> acc |> MapSet.put(k) end)
 
     group(data, [], [])
-    |> Enum.filter(&valid?(&1, symbols))
     |> Enum.map(&{&1, symbol_pos(&1, symbols)})
     |> Enum.map(fn {e, p} ->
       {e |> Enum.map(fn {_, c} -> c end) |> Enum.join() |> String.to_integer(), p}
