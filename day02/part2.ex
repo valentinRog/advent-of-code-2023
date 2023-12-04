@@ -3,9 +3,7 @@ defmodule M do
     score(tail, m |> Map.put(b, max(String.to_integer(a), m |> Map.get(b, 0))))
   end
 
-  defp score([], m) do
-    m |> Map.values() |> Enum.product()
-  end
+  defp score([], m), do: m |> Map.values() |> Enum.product()
 
   def solve do
     IO.read(:stdio, :all)
