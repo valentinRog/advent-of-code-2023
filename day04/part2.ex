@@ -1,7 +1,9 @@
 defmodule M do
   def score(m, i) do
-     m |> Map.get(i)
-     1 + case m |> Map.get(i, 0) do
+    m |> Map.get(i)
+
+    1 +
+      case m |> Map.get(i, 0) do
         0 -> 0
         n -> (i + 1)..(i + n) |> Stream.map(&score(m, &1)) |> Enum.sum()
       end
@@ -23,8 +25,8 @@ defmodule M do
       |> Enum.map(fn [s1, s2] -> MapSet.intersection(s1, s2) |> MapSet.size() end)
       |> Enum.with_index()
       |> Enum.reduce(%{}, fn {v, k}, acc -> acc |> Map.put(k, v) end)
-m
-    |> Map.keys() |> Stream.map(&(score(m, &1))) |> Enum.sum()
+
+    m |> Map.keys() |> Stream.map(&score(m, &1)) |> Enum.sum()
   end
 end
 
