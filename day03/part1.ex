@@ -1,13 +1,14 @@
 defmodule M do
-  defp group(data, l) do
-    f? = &("0123456789" |> String.contains?(&1))
-    data = data |> Enum.drop_while(fn {_, c} -> not f?.(c) end)
-    ll = data |> Enum.take_while(fn {_, c} -> f?.(c) end)
-    data = data |> Enum.drop_while(fn {_, c} -> f?.(c) end)
+  defp digit?(s), do: "0123456789" |> String.contains?(s)
 
-    case ll do
-      [] -> l
-      _ -> group(data, l ++ [ll])
+  defp group([], l, []), do: l
+  defp group([], l, ll), do: l ++ [ll]
+
+  defp group([{{x, y}, c} | tail], l, ll) do
+    cond do
+      not digit?(c) and ll == [] -> group(tail, l, ll)
+      not digit?(c) -> group(tail, l ++ [ll], [])
+      true -> group(tail, l, ll ++ [{{x, y}, c}])
     end
   end
 
@@ -46,7 +47,7 @@ defmodule M do
       |> Enum.filter(fn {_, v} -> not String.contains?("0123456789.", v) end)
       |> Enum.reduce(MapSet.new(), fn {k, _}, acc -> acc |> MapSet.put(k) end)
 
-    group(data, [])
+    group(data, [], [])
     |> Enum.filter(&valid?(&1, symbols))
     |> Enum.map(fn l -> l |> Enum.map(fn {_, c} -> c end) end)
     |> Enum.map(&Enum.join/1)
