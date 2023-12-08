@@ -37,4 +37,4 @@ defmodule M do
   end
 end
 
-IO.inspect(M.solve())
+IO.puts(M.solve())
