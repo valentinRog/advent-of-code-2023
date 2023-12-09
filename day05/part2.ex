@@ -8,14 +8,23 @@ defmodule M do
   defp seed([head | tail], n, skip) do
     {n, skip} =
       case head |> Enum.find(fn [s, _, l] -> n in s..(s + l - 1) end) do
-        nil -> {n, skip}
-        [s, d, l] -> {d + n - s, min(skip, l - (n - s))}
+        nil ->
+          {n, skip || 1}
+
+        [s, d, l] ->
+          {d + n - s,
+           case skip do
+             nil -> l - (n - s)
+             _ -> min(skip, l - (n - s))
+           end}
       end
+
     seed(tail, n, skip)
   end
 
   defp compute(maps, seeds, i) do
-    {n, skip} = seed(maps, i, 999999999999)
+    {n, skip} = seed(maps, i, nil)
+
     case seed?(seeds, n) do
       true -> i
       _ -> compute(maps, seeds, i + skip)
