@@ -6,10 +6,26 @@ defmodule M do
   defp seed([], n, skip), do: {n, skip}
 
   defp seed([head | tail], n, skip) do
+    bound_skip = fn skip, new_skip ->
+      case skip do
+        nil -> new_skip
+        _ -> min(skip, new_skip)
+      end
+    end
+
     {n, skip} =
       case head |> Enum.find(fn [s, _, l] -> n in s..(s + l - 1) end) do
-        nil -> {n, skip || 1}
-        [s, d, l] -> {d + n - s, min(skip || l - (n - s), l - (n - s))}
+        nil ->
+          {n,
+           skip
+           |> bound_skip.(
+             Stream.filter(head, fn [s, _, _] -> s > n end)
+             |> Stream.map(fn [s, _, _] -> s - n end)
+             |> Enum.min(fn -> 1 end)
+           )}
+
+        [s, d, l] ->
+          {d + n - s, skip |> bound_skip.(l - (n - s))}
       end
 
     seed(tail, n, skip)
@@ -17,6 +33,12 @@ defmodule M do
 
   defp compute(maps, seeds, i) do
     {n, skip} = seed(maps, i, nil)
+
+    skip =
+      case seeds |> Enum.find(fn [s, _] -> n < s and s < n + skip end) do
+        nil -> skip
+        [s, _] -> s - n
+      end
 
     case seed?(seeds, n) do
       true -> i
