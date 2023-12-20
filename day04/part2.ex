@@ -1,27 +1,20 @@
 defmodule M do
   use Agent
 
-  defp get_from_cache(i) do
-    Agent.get(__MODULE__, & &1)[i]
-  end
-
-  defp add_to_cache(i, n) do
-    Agent.update(__MODULE__, fn cache -> cache |> Map.put(i, n) end)
-  end
-
   defp score(m, i) do
-    case get_from_cache(i) do
+    case Agent.get(:cache, & &1)[i] do
       nil ->
-        add_to_cache(
-          i,
-          1 +
-            case m |> Map.get(i, 0) do
-              0 -> 0
-              n -> (i + 1)..(i + n) |> Stream.map(&score(m, &1)) |> Enum.sum()
-            end
-        )
+        (1 +
+           case m |> Map.get(i, 0) do
+             0 -> 0
+             n -> (i + 1)..(i + n) |> Stream.map(&score(m, &1)) |> Enum.sum()
+           end)
+        |> (fn n -> Agent.update(:cache, fn cache -> cache |> Map.put(i, n) end) end).()
+
         score(m, i)
-      n -> n
+
+      n ->
+        n
     end
   end
 
@@ -42,7 +35,7 @@ defmodule M do
       |> Enum.with_index()
       |> Enum.reduce(%{}, fn {v, k}, acc -> acc |> Map.put(k, v) end)
 
-    Agent.start_link(fn -> %{} end, name: __MODULE__)
+    Agent.start_link(fn -> %{} end, name: :cache)
     m |> Map.keys() |> Stream.map(&score(m, &1)) |> Enum.sum()
   end
 end
