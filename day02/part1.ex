@@ -15,7 +15,7 @@ defmodule M do
   end
 
   def solve do
-    IO.read(:stdio, :all)
+    IO.read(:all)
     |> String.trim()
     |> (fn s -> ":,;" |> String.split("") |> Enum.reduce(s, &String.replace(&2, &1, "")) end).()
     |> String.split("\n")

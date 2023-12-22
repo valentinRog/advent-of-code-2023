@@ -1,6 +1,6 @@
 defmodule M do
   def solve do
-    IO.read(:stdio, :all)
+    IO.read(:all)
     |> String.trim()
     |> String.split("\n")
     |> Enum.flat_map(&(String.split(&1, ":") |> Enum.drop(1)))

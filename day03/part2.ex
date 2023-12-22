@@ -36,7 +36,7 @@ defmodule M do
 
   def solve do
     data =
-      IO.read(:stdio, :all)
+      IO.read(:all)
       |> String.trim()
       |> String.replace("\n", ".\n")
       |> String.split("\n")

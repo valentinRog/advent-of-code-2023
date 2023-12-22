@@ -11,7 +11,7 @@ defmodule M do
   end
 
   def solve do
-    IO.read(:stdio, :all)
+    IO.read(:all)
     |> String.trim()
     |> String.split("\n")
     |> Enum.map(fn s -> s |> String.split() |> Enum.map(&String.to_integer/1) end)

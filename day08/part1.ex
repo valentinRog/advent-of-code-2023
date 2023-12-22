@@ -1,6 +1,6 @@
 defmodule M do
   def solve do
-    [path, m] = IO.read(:stdio, :all) |> String.trim() |> String.split("\n\n")
+    [path, m] = IO.read(:all) |> String.trim() |> String.split("\n\n")
     path = path |> String.graphemes() |> Stream.cycle()
 
     m =

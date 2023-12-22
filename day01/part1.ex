@@ -9,7 +9,7 @@ defmodule M do
   end
 
   def solve do
-    IO.read(:stdio, :all)
+    IO.read(:all)
     |> String.trim()
     |> String.split("\n")
     |> Enum.map(&(first_digit(&1) <> first_digit(String.reverse(&1))))

@@ -13,6 +13,12 @@ defmodule M do
     end
   end
 
+  defp compute({x, y}, {dx, dy}, data, pipes) do
+    Agent.update(:cache, fn _ -> %{} end)
+    traverse({x, y}, {dx, dy}, data, pipes)
+    Agent.get(:cache, &map_size/1)
+  end
+
   def solve() do
     data =
       IO.read(:all)
@@ -56,8 +62,20 @@ defmodule M do
     }
 
     Agent.start_link(fn -> %{} end, name: :cache)
-    traverse({0, 0}, dirs.e, data, pipes)
-    Agent.get(:cache, &map_size/1)
+
+    mx = data |> Map.keys() |> Stream.map(&elem(&1, 0)) |> Enum.max()
+    my = data |> Map.keys() |> Stream.map(&elem(&1, 1)) |> Enum.max()
+
+    0..my
+    |> Stream.flat_map(fn y -> 0..mx |> Enum.map(fn x -> {x, y} end) end)
+    |> Stream.filter(fn {x, y} -> x == 0 or x == mx or y == 0 or y == my end)
+    |> Stream.map(fn {x, y} ->
+      dirs
+      |> Map.values()
+      |> Stream.map(fn {dx, dy} -> compute({x, y}, {dx, dy}, data, pipes) end)
+      |> Enum.max()
+    end)
+    |> Enum.max()
   end
 end
 

@@ -20,7 +20,7 @@ defmodule M do
 
   def solve do
     m =
-      IO.read(:stdio, :all)
+      IO.read(:all)
       |> String.trim()
       |> String.split("\n")
       |> Enum.flat_map(&(String.split(&1, ":") |> Enum.drop(1)))

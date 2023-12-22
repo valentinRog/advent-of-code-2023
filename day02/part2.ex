@@ -6,7 +6,7 @@ defmodule M do
   defp score([], m), do: m |> Map.values() |> Enum.product()
 
   def solve do
-    IO.read(:stdio, :all)
+    IO.read(:all)
     |> String.trim()
     |> (fn s -> ":,;" |> String.split("") |> Enum.reduce(s, &String.replace(&2, &1, "")) end).()
     |> String.split("\n")

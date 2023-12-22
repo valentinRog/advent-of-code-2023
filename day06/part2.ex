@@ -1,7 +1,7 @@
 defmodule M do
   def solve do
     [t, d] =
-      IO.read(:stdio, :all)
+      IO.read(:all)
       |> String.trim()
       |> String.split("\n")
       |> Enum.map(fn s ->

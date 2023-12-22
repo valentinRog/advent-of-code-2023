@@ -29,7 +29,7 @@ defmodule M do
 
     mr = Enum.reduce(m, %{}, fn {k, v}, acc -> Map.put(acc, String.reverse(k), v) end)
 
-    IO.read(:stdio, :all)
+    IO.read(:all)
     |> String.trim()
     |> String.split("\n")
     |> Enum.map(&(first_digit(&1, m) <> first_digit(String.reverse(&1), mr)))

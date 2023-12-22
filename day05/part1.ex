@@ -13,7 +13,7 @@ defmodule M do
 
   def solve do
     data =
-      IO.read(:stdio, :all)
+      IO.read(:all)
       |> String.trim()
       |> String.split("\n\n")
 
