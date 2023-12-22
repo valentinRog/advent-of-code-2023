@@ -4,11 +4,8 @@ defmodule M do
       Agent.update(:cache, fn cache -> cache |> Map.put({x, y}, {dx, dy}) end)
 
       case pipes[data[{x, y}]][{dx, dy}] do
-        nil ->
-          traverse({x + dx, y + dy}, {dx, dy}, data, pipes)
-
-        l ->
-          l |> Enum.each(fn {dx, dy} -> traverse({x + dx, y + dy}, {dx, dy}, data, pipes) end)
+        nil -> traverse({x + dx, y + dy}, {dx, dy}, data, pipes)
+        l -> l |> Enum.each(fn {dx, dy} -> traverse({x + dx, y + dy}, {dx, dy}, data, pipes) end)
       end
     end
   end
@@ -24,9 +21,7 @@ defmodule M do
         s
         |> String.graphemes()
         |> Enum.with_index()
-        |> Enum.map(fn {c, x} ->
-          {{x, y}, c}
-        end)
+        |> Enum.map(fn {c, x} -> {{x, y}, c} end)
       end)
       |> Enum.reduce(%{}, fn {k, v}, acc -> acc |> Map.put(k, v) end)
 

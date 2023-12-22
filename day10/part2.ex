@@ -10,9 +10,7 @@ defmodule M do
         s
         |> String.graphemes()
         |> Enum.with_index()
-        |> Enum.map(fn {c, x} ->
-          {{x, y}, c}
-        end)
+        |> Enum.map(fn {c, x} -> {{x, y}, c} end)
       end)
       |> Enum.reduce(%{}, fn {k, v}, acc -> acc |> Map.put(k, v) end)
 
