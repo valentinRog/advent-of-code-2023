@@ -1,16 +1,16 @@
 defmodule M do
-  defp traverse(p, 64, _) do
-    Agent.update(:res, fn res -> res |> MapSet.put(p) end)
-  end
+  defp traverse(p, 64, _, acc), do: acc |> MapSet.put(p)
 
-  defp traverse({x, y}, steps, data) do
+  defp traverse({x, y}, steps, data, acc) do
     unless Agent.get(:cache, fn cache -> cache |> MapSet.member?({{x, y}, steps}) end) do
       Agent.update(:cache, fn cache -> cache |> MapSet.put({{x, y}, steps}) end)
 
       [{0, -1}, {0, 1}, {-1, 0}, {1, 0}]
       |> Stream.map(fn {dx, dy} -> {x + dx, y + dy} end)
       |> Stream.filter(fn p -> data[p] == "." end)
-      |> Enum.each(&traverse(&1, steps + 1, data))
+      |> Enum.reduce(acc, fn p, acc ->
+        acc |> MapSet.union(traverse(p, steps + 1, data, acc) || MapSet.new())
+      end)
     end
   end
 
@@ -31,11 +31,9 @@ defmodule M do
 
     p0 = data |> Enum.find(fn {_, v} -> v == "S" end) |> elem(0)
     data = data |> Map.replace(p0, ".")
-    Agent.start_link(fn -> MapSet.new() end, name: :res)
     Agent.start_link(fn -> MapSet.new() end, name: :cache)
-    traverse(p0, 0, data)
-    Agent.get(:res, &MapSet.size/1)
+    traverse(p0, 0, data, MapSet.new()) |> MapSet.size()
   end
 end
 
-IO.puts(M.solve())
+IO.inspect(M.solve())
