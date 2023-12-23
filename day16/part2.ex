@@ -1,19 +1,20 @@
 defmodule M do
-  defp traverse({x, y}, {dx, dy}, data, pipes) do
-    unless Agent.get(:cache, fn cache -> cache[{x, y}] == {dx, dy} end) or is_nil(data[{x, y}]) do
-      Agent.update(:cache, fn cache -> cache |> Map.put({x, y}, {dx, dy}) end)
+  defp traverse({x, y}, {dx, dy}, data, pipes, cache) do
+    if cache[{x, y}] == {dx, dy} or is_nil(data[{x, y}]) do
+      cache
+    else
+      cache = cache |> Map.put({x, y}, {dx, dy})
+      f = fn {dx, dy}, cache -> traverse({x + dx, y + dy}, {dx, dy}, data, pipes, cache) end
 
       case pipes[data[{x, y}]][{dx, dy}] do
-        nil -> traverse({x + dx, y + dy}, {dx, dy}, data, pipes)
-        l -> l |> Enum.each(fn {dx, dy} -> traverse({x + dx, y + dy}, {dx, dy}, data, pipes) end)
+        nil -> f.({dx, dy}, cache)
+        l -> l |> Enum.reduce(cache, fn {dx, dy}, cache -> f.({dx, dy}, cache) end)
       end
     end
   end
 
   defp compute({x, y}, {dx, dy}, data, pipes) do
-    Agent.update(:cache, fn _ -> %{} end)
-    traverse({x, y}, {dx, dy}, data, pipes)
-    Agent.get(:cache, &map_size/1)
+    traverse({x, y}, {dx, dy}, data, pipes, %{}) |> map_size()
   end
 
   def solve() do
@@ -55,8 +56,6 @@ defmodule M do
       },
       "." => %{}
     }
-
-    Agent.start_link(fn -> %{} end, name: :cache)
 
     mx = data |> Map.keys() |> Stream.map(&elem(&1, 0)) |> Enum.max()
     my = data |> Map.keys() |> Stream.map(&elem(&1, 1)) |> Enum.max()
