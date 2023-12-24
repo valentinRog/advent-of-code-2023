@@ -1,6 +1,6 @@
 defmodule M do
   defp score(l) do
-    case l |> Enum.group_by(& &1) |> Map.values() |> Enum.map(&length/1) |> Enum.sort() do
+    case l |> Enum.frequencies() |> Map.values() |> Enum.sort() do
       [5] -> 6
       [1, 4] -> 5
       [2, 3] -> 4

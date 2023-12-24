@@ -21,7 +21,7 @@ defmodule M do
       IO.read(:all)
       |> String.trim()
       |> String.split("\n")
-      |> Enum.map(&String.trim(&1))
+      |> Enum.map(&String.trim/1)
       |> Enum.with_index()
       |> Enum.flat_map(fn {s, y} ->
         s
