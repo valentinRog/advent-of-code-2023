@@ -29,6 +29,71 @@ defmodule M do
     groups_size(conn, duos, [])
   end
 
+  defp path(_, _, [], _, _), do: nil
+
+  defp path(dest, conn, [head | tail], seen, restrictions) do
+    case head |> Enum.at(-1) do
+      ^dest ->
+        head
+
+      p ->
+        tail =
+          conn[p]
+          |> Enum.reduce(tail, fn p, acc ->
+            case seen |> MapSet.member?(head |> Enum.at(-1)) or
+                   (p != dest and restrictions |> MapSet.member?(p)) do
+              true -> acc
+              _ -> acc ++ [head ++ [p]]
+            end
+          end)
+
+        path(dest, conn, tail, seen |> MapSet.put(head |> Enum.at(-1)), restrictions)
+    end
+  end
+
+  defp path(src, dest, conn, restrictions) do
+    path(dest, conn, [[src]], MapSet.new(), restrictions)
+  end
+
+  defp more_than_3_paths?(_, _, _, _, n) when n > 3, do: true
+
+  defp more_than_3_paths?(src, dest, conn, restrictions, n) do
+    case path(src, dest, conn, restrictions) do
+      nil ->
+        false
+
+      res ->
+        more_than_3_paths?(src, dest, conn, restrictions |> MapSet.union(MapSet.new(res)), n + 1)
+    end
+  end
+
+  defp more_than_3_paths?(src, dest, conn) do
+    more_than_3_paths?(src, dest, conn, MapSet.new(), 0)
+  end
+
+  defp all_paths(src, dest, conn, restrictions, acc) do
+    case path(src, dest, conn, restrictions) do
+      nil ->
+        acc
+
+      path ->
+        all_paths(src, dest, conn, restrictions |> MapSet.union(MapSet.new(path)), acc ++ [path])
+    end
+  end
+
+  defp all_paths(src, dest, conn), do: all_paths(src, dest, conn, MapSet.new(), [])
+
+  defp combinaisons([], acc), do: acc
+
+  defp combinaisons([head | tail], []) do
+    combinaisons(tail, head |> Enum.map(&[&1]))
+  end
+
+  defp combinaisons([head | tail], acc) do
+    acc = acc |> Enum.flat_map(fn l -> head |> Enum.map(fn x -> l ++ [x] end) end)
+    combinaisons(tail, acc)
+  end
+
   def solve do
     data =
       IO.read(:all)
@@ -51,13 +116,19 @@ defmodule M do
         v |> Enum.reduce(acc, fn kk, acc -> acc |> insert.(kk, [k]) end)
       end)
 
-    duos =
+    [src, dest] =
       data
-      |> Enum.flat_map(fn {k, v} ->
-        v |> Enum.reduce([], fn v, acc -> acc ++ [[k, v] |> Enum.sort()] end)
-      end)
-      |> Enum.uniq()
+      |> Map.keys()
+      |> Enum.flat_map(fn k -> data |> Map.keys() |> Enum.map(&[&1, k]) end)
+      |> Enum.find(fn [src, dest] -> not more_than_3_paths?(src, dest, data) end)
+
+    all_paths(src, dest, data)
+    |> Enum.map(fn l -> l |> Enum.chunk_every(2, 1, :discard) end)
+    |> combinaisons([])
+    |> Stream.map(fn duos -> data |> groups_size(duos) end)
+    |> Enum.find(&(length(&1) == 2))
+    |> Enum.product()
   end
 end
 
-IO.inspect(M.solve())
+IO.puts(M.solve())
