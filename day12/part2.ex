@@ -26,7 +26,7 @@ defmodule M do
     else
       key = serialize(s, ns, acc, tmp)
 
-      case Agent.get(:cache, & &1)[key] do
+      case Agent.get(:cache, & &1[key]) do
         nil ->
           [c | s] = s
 
