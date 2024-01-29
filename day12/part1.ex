@@ -1,34 +1,31 @@
 defmodule M do
-  defp valid?(s, ns) do
-    s
-    |> String.split(".", trim: true)
-    |> Enum.map(&String.length/1) == ns
-  end
+  defp dfs([], ns, acc, tmp) do
+    acc = (acc ++ [tmp]) |> Enum.filter(&(&1 != 0))
+    acc = acc |> Enum.filter(&(&1 != 0))
 
-  defp possible?(s, ns) do
-    l = s |> String.split(".", trim: true) |> Enum.map(&String.length/1)
-
-    case l |> length do
-      len when len > 1 -> l |> Enum.take(len - 1) == ns |> Enum.take(len - 1)
-      _ -> true
+    case acc == ns do
+      true -> 1
+      _ -> 0
     end
   end
 
-  defp combinaisons([], acc, _), do: acc
+  defp dfs(s, ns, acc, tmp) do
+    acc = acc |> Enum.filter(&(&1 != 0))
 
-  defp combinaisons([h | t], acc, ns) do
-    acc =
-      acc
-      |> Enum.flat_map(fn s ->
-        cond do
-          not possible?(s, ns) -> []
-          h == "?" -> [s <> ".", s <> "#"]
-          true -> [s <> h]
-        end
-      end)
+    if(acc != ns |> Enum.take(acc |> length)) do
+      0
+    else
+      [c | s] = s
 
-    combinaisons(t, acc, ns)
+      case c do
+        "?" -> dfs(s, ns, acc, tmp + 1) + dfs(s, ns, acc ++ [tmp], 0)
+        "." -> dfs(s, ns, acc ++ [tmp], 0)
+        "#" -> dfs(s, ns, acc, tmp + 1)
+      end
+    end
   end
+
+  defp dfs(s, ns), do: dfs(s, ns, [], 0)
 
   def solve do
     IO.read(:all)
@@ -36,11 +33,7 @@ defmodule M do
     |> String.split("\n")
     |> Enum.map(&String.split/1)
     |> Enum.map(fn [s, ns] -> {s, ns |> String.split(",") |> Enum.map(&String.to_integer/1)} end)
-    |> Enum.map(fn {s, ns} ->
-      combinaisons(s |> String.graphemes(), [""], ns)
-      |> Enum.filter(&valid?(&1, ns))
-      |> Enum.count()
-    end)
+    |> Enum.map(fn {s, ns} -> dfs(s |> String.graphemes(), ns) end)
     |> Enum.sum()
   end
 end
