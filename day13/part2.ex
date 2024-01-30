@@ -27,17 +27,29 @@ defmodule M do
   end
 
   defp col_on_left(m) do
-    case 0..(mx(m) - 1) |> Enum.find(&vsym?(&1, m)) do
-      nil -> nil
-      axe -> axe + 1
-    end
+    0..(mx(m) - 1) |> Enum.filter(&vsym?(&1, m)) |> Enum.map(&(&1 + 1))
+  end
+
+  defp compute(_, [], acc), do: acc
+
+  defp compute(m, [h | t], acc) do
+    mm =
+      case m[h] do
+        "." -> m |> Map.put(h, "#")
+        "#" -> m |> Map.put(h, ".")
+      end
+
+    compute(m, t, acc ++ col_on_left(mm) ++ (col_on_left(mm |> rotate) |> Enum.map(&(&1 * 100))))
   end
 
   defp compute(m) do
-    case m |> col_on_left do
-      nil -> 100 * col_on_left(m |> rotate)
-      n -> n
-    end
+    n0 =
+      case m |> col_on_left() do
+        [] -> 100 * (col_on_left(m |> rotate) |> Enum.at(0))
+        [n | _] -> n
+      end
+
+    compute(m, m |> Map.keys(), []) |> Enum.find(&(&1 != n0))
   end
 
   def solve do
