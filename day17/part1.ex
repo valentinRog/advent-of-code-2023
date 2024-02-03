@@ -61,26 +61,19 @@ defmodule M do
 
   defp dijkstra_compute_d(m, {q, dists}, p, ds, d) do
     np = p |> P.add(d)
+    cost = dists[{p, ds}] + m[np]
+    ds = ds |> new_ds(d)
 
-    case m |> Map.has_key?(np) and ds != d |> P.prod(-1) do
-      false ->
+    cond do
+      P.module(ds) > 3 ->
         {q, dists}
 
-      _ ->
-        cost = dists[{p, ds}] + m[np]
-        ds = ds |> new_ds(d)
+      dists |> Map.has_key?({np, ds}) and dists[{np, ds}] <= cost ->
+        {q, dists}
 
-        cond do
-          P.module(ds) > 3 ->
-            {q, dists}
-
-          dists |> Map.has_key?({np, ds}) and dists[{np, ds}] <= cost ->
-            {q, dists}
-
-          true ->
-            {q |> MinHeap.push({cost, {np, ds}}),
-             dists |> Map.put({np, ds}, cost) |> Map.put(np, cost)}
-        end
+      true ->
+        {q |> MinHeap.push({cost, {np, ds}}),
+         dists |> Map.put({np, ds}, cost) |> Map.put(np, cost)}
     end
   end
 
@@ -90,7 +83,10 @@ defmodule M do
     {q, dists} =
       [{0, 1}, {0, -1}, {1, 0}, {-1, 0}]
       |> Enum.reduce({q, dists}, fn d, {q, dists} ->
-        dijkstra_compute_d(m, {q, dists}, p, ds, d)
+        case m |> Map.has_key?(p |> P.add(d)) and ds != d |> P.prod(-1) do
+          false -> {q, dists}
+          _ -> dijkstra_compute_d(m, {q, dists}, p, ds, d)
+        end
       end)
 
     case dists[pf] do
