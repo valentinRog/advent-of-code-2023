@@ -46,14 +46,18 @@ defmodule P do
 
   def prod({px, py}, k), do: {px * k, py * k}
 
-  def module({px, py}), do: px + py
+  def module({px, py}), do: abs(px) + abs(py)
+
+  def dir({0, 0}), do: {0, 0}
+
+  def dir(p), do: p |> prod(1 / module(p))
 end
 
 defmodule M do
   defp new_ds({0, 0}, d), do: d
 
   defp new_ds(ds, d) do
-    case ds |> P.prod(1 / P.module(ds)) == d do
+    case ds |> P.dir() == d do
       true -> ds |> P.add(d)
       _ -> d
     end
@@ -83,9 +87,10 @@ defmodule M do
     {q, dists} =
       [{0, 1}, {0, -1}, {1, 0}, {-1, 0}]
       |> Enum.reduce({q, dists}, fn d, {q, dists} ->
-        case m |> Map.has_key?(p |> P.add(d)) and ds != d |> P.prod(-1) do
-          false -> {q, dists}
-          _ -> dijkstra_compute_d(m, {q, dists}, p, ds, d)
+        cond do
+          not (m |> Map.has_key?(p |> P.add(d))) -> {q, dists}
+          ds |> P.dir() == d |> P.prod(-1) -> {q, dists}
+          true -> dijkstra_compute_d(m, {q, dists}, p, ds, d)
         end
       end)
 
