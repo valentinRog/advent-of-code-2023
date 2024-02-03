@@ -40,3 +40,85 @@ defmodule MinHeap do
     end
   end
 end
+
+defmodule P do
+  def add({px1, py1}, {px2, py2}), do: {px1 + px2, py1 + py2}
+
+  def prod({px, py}, k), do: {px * k, py * k}
+
+  def module({px, py}), do: px + py
+end
+
+defmodule M do
+  defp new_ds({0, 0}, d), do: d
+
+  defp new_ds(ds, d) do
+    case ds |> P.prod(1 / P.module(ds)) == d do
+      true -> ds |> P.add(d)
+      _ -> d
+    end
+  end
+
+  defp dijkstra_compute_d(m, {q, dists}, p, ds, d) do
+    np = p |> P.add(d)
+
+    case m |> Map.has_key?(np) and ds != d |> P.prod(-1) do
+      false ->
+        {q, dists}
+
+      _ ->
+        cost = dists[{p, ds}] + m[np]
+        ds = ds |> new_ds(d)
+
+        cond do
+          P.module(ds) > 3 ->
+            {q, dists}
+
+          dists |> Map.has_key?({np, ds}) and dists[{np, ds}] <= cost ->
+            {q, dists}
+
+          true ->
+            {q |> MinHeap.push({cost, {np, ds}}),
+             dists |> Map.put({np, ds}, cost) |> Map.put(np, cost)}
+        end
+    end
+  end
+
+  defp dijkstra(m, pf, q, dists) do
+    {{_, {p, ds}}, q} = q |> MinHeap.pop()
+
+    {q, dists} =
+      [{0, 1}, {0, -1}, {1, 0}, {-1, 0}]
+      |> Enum.reduce({q, dists}, fn d, {q, dists} ->
+        dijkstra_compute_d(m, {q, dists}, p, ds, d)
+      end)
+
+    case dists[pf] do
+      nil -> dijkstra(m, pf, q, dists)
+      cost -> cost
+    end
+  end
+
+  defp dijkstra(m) do
+    k0 = {{0, 0}, {0, 0}}
+    dijkstra(m, m |> Map.keys() |> Enum.max(), %{0 => {0, k0}}, %{k0 => 0})
+  end
+
+  def solve do
+    IO.read(:all)
+    |> String.trim()
+    |> String.split("\n")
+    |> Enum.map(&String.trim(&1))
+    |> Enum.with_index()
+    |> Enum.flat_map(fn {s, y} ->
+      s
+      |> String.graphemes()
+      |> Enum.with_index()
+      |> Enum.map(fn {c, x} -> {{x, y}, c |> String.to_integer()} end)
+    end)
+    |> Enum.reduce(%{}, fn {k, v}, acc -> acc |> Map.put(k, v) end)
+    |> dijkstra()
+  end
+end
+
+M.solve() |> IO.puts()
