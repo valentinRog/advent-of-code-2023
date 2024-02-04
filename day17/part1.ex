@@ -72,7 +72,7 @@ defmodule M do
       P.module(ds) > 3 ->
         {q, dists}
 
-      dists |> Map.has_key?({np, ds}) and dists[{np, ds}] <= cost ->
+      dists |> Map.has_key?({np, ds}) ->
         {q, dists}
 
       true ->
