@@ -1,14 +1,6 @@
 defmodule M do
   defp digit?(c), do: "0123456789" |> String.contains?(c)
 
-  defp extract_int(s) do
-    s
-    |> String.graphemes()
-    |> Enum.filter(&digit?/1)
-    |> Enum.join()
-    |> String.to_integer()
-  end
-
   defp parse_instructions([s], acc), do: acc ++ [s]
 
   defp parse_instructions([h | t], acc) do
@@ -18,7 +10,11 @@ defmodule M do
           {
             String.at(h, 0),
             String.at(h, 1),
-            h |> extract_int,
+            h
+            |> String.graphemes()
+            |> Enum.filter(&digit?/1)
+            |> Enum.join()
+            |> String.to_integer(),
             h |> String.split(":") |> Enum.at(-1)
           }
         ]
@@ -38,15 +34,8 @@ defmodule M do
     compute(workflows[s], workflows, ratings)
   end
 
-  defp compute([{k, "<", n, s} | t], workflows, ratings) do
-    case ratings[k] < n do
-      true -> compute(workflows[s], workflows, ratings)
-      false -> compute(t, workflows, ratings)
-    end
-  end
-
-  defp compute([{k, ">", n, s} | t], workflows, ratings) do
-    case ratings[k] > n do
+  defp compute([{k, c, n, s} | t], workflows, ratings) do
+    case %{">" => ratings[k] > n, "<" => ratings[k] < n}[c] do
       true -> compute(workflows[s], workflows, ratings)
       false -> compute(t, workflows, ratings)
     end
@@ -86,4 +75,4 @@ defmodule M do
   end
 end
 
-M.solve() |> IO.inspect()
+M.solve() |> IO.puts()
