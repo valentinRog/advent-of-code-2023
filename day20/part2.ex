@@ -84,7 +84,7 @@ defmodule M do
     q = broadcaster |> Enum.map(fn k -> {nil, 0, k} end)
     cycles = conn(ins, rx_caller) |> Enum.reduce(%{}, fn k, acc -> acc |> Map.put(k, nil) end)
 
-    1..100_000
+    Stream.iterate(1, &(&1 + 1))
     |> Enum.reduce_while({ff, history, cycles}, fn i, {ff, history, cycles} ->
       {ff, history, cycles} = simulate(ins, q, {ff, history, cycles}, rx_caller)
 
