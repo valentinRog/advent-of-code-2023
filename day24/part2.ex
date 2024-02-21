@@ -27,33 +27,14 @@ defmodule M do
     m
     |> Map.keys()
     |> Enum.reduce(%{}, fn {ii, jj}, acc ->
-      k =
-        case {ii, jj} do
-          {^i, _} ->
-            nil
+      cond do
+        ii == i or jj == j ->
+          acc
 
-          {_, ^j} ->
-            nil
-
-          _ ->
-            ni =
-              case ii > i do
-                true -> ii - 1
-                _ -> ii
-              end
-
-            nj =
-              case jj > j do
-                true -> jj - 1
-                _ -> jj
-              end
-
-            {ni, nj}
-        end
-
-      case k do
-        nil -> acc
-        _ -> acc |> Map.put(k, m[{ii, jj}])
+        true ->
+          ni = if ii < i, do: ii, else: ii - 1
+          nj = if jj < j, do: jj, else: jj - 1
+          acc |> Map.put({ni, nj}, m[{ii, jj}])
       end
     end)
   end
@@ -67,9 +48,7 @@ defmodule M do
     |> Enum.reduce(%{}, fn {k, v}, acc -> acc |> Map.put(k, v) end)
   end
 
-  defp mi(m) do
-    m |> Map.keys() |> Enum.max() |> elem(0)
-  end
+  defp mi(m), do: m |> Map.keys() |> Enum.max() |> elem(0)
 
   defp det(m) when map_size(m) == 1 do
     m[{0, 0}]
@@ -78,12 +57,7 @@ defmodule M do
   defp det(m) do
     0..mi(m)
     |> Enum.reduce(0, fn i, acc ->
-      sign =
-        case rem(i, 2) do
-          0 -> 1
-          1 -> -1
-        end
-
+      sign = if rem(i, 2) == 0, do: 1, else: -1
       acc + sign * m[{i, 0}] * det(submatrix(m, {i, 0}))
     end)
   end
@@ -94,7 +68,7 @@ defmodule M do
 
   defp cramer(a, b) do
     d = det(a)
-    0..2 |> Enum.map(fn j -> div(a |> replace_col(b, j) |> det(), d) end)
+    0..(length(b) - 1) |> Enum.map(fn j -> div(a |> replace_col(b, j) |> det(), d) end)
   end
 
   def solve do
@@ -106,12 +80,12 @@ defmodule M do
       |> String.split("\n")
       |> Enum.map(fn s -> s |> String.split() |> Enum.map(&String.to_integer/1) end)
 
-    r0 = data |> Enum.at(1)
-    rs = data |> Enum.drop(1) |> Enum.take_random(3)
+    r0 = data |> Enum.at(0)
+    rs = data |> Enum.drop(1) |> Enum.take(3)
     coeff = rs |> Enum.flat_map(fn r -> [e1(r0, r), e2(r0, r)] end)
     a = coeff |> Enum.map(&List.delete_at(&1, -1)) |> make_matrix()
     b = coeff |> Enum.map(&Enum.at(&1, -1))
-    cramer(a, b) |> Enum.sum()
+    cramer(a, b) |> Enum.take(3) |> Enum.sum()
   end
 end
 
