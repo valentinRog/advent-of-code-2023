@@ -1,28 +1,9 @@
 defmodule M do
-  defp digit?(c), do: "0123456789" |> String.contains?(c)
-
-  defp parse_instructions([s], acc), do: acc ++ [s]
-
-  defp parse_instructions([h | t], acc) do
-    acc =
-      acc ++
-        [
-          {
-            String.at(h, 0),
-            String.at(h, 1),
-            h
-            |> String.graphemes()
-            |> Enum.filter(&digit?/1)
-            |> Enum.join()
-            |> String.to_integer(),
-            h |> String.split(":") |> Enum.at(-1)
-          }
-        ]
-
-    parse_instructions(t, acc)
+  defp parse_instruction(s) do
+    [cmp, dst] = s |> String.split(":")
+    [k, c | n] = cmp |> String.graphemes()
+    {k, c, n |> Enum.join() |> String.to_integer(), dst}
   end
-
-  defp parse_instructions(l), do: l |> parse_instructions([])
 
   defp compute("A", _, workflows) do
     workflows |> Map.values() |> Enum.map(fn {x0, x1} -> x1 - x0 + 1 end) |> Enum.product()
@@ -38,22 +19,18 @@ defmodule M do
     {x0, x1} = ratings[k]
 
     {r_valid, r_invalid} =
-      %{
-        ">" => {{n + 1, x1}, {x0, n}},
-        "<" => {{x0, n - 1}, {n, x1}}
-      }[c]
+      case c do
+        ">" -> {{n + 1, x1}, {x0, n}}
+        "<" -> {{x0, n - 1}, {n, x1}}
+      end
 
     compute(workflows[s], workflows, ratings |> Map.put(k, r_valid)) +
       compute(t, workflows, ratings |> Map.put(k, r_invalid))
   end
 
   defp compute(workflows) do
-    compute(["in"], workflows, %{
-      "x" => {1, 4000},
-      "m" => {1, 4000},
-      "a" => {1, 4000},
-      "s" => {1, 4000}
-    })
+    r0 = {1, 4000}
+    compute(["in"], workflows, %{"x" => r0, "m" => r0, "a" => r0, "s" => r0})
   end
 
   def solve do
@@ -68,7 +45,9 @@ defmodule M do
       |> Enum.reduce(s, fn c, s -> s |> String.replace(c, " ") end)
       |> String.split()
     end)
-    |> Enum.map(fn [h | t] -> {h, t |> parse_instructions()} end)
+    |> Enum.map(fn [h | t] ->
+      {h, (Enum.drop(t, -1) |> Enum.map(&parse_instruction/1)) ++ Enum.take(t, -1)}
+    end)
     |> Enum.reduce(%{}, fn {k, v}, m -> m |> Map.put(k, v) end)
     |> Map.put("A", "A")
     |> Map.put("R", "R")
