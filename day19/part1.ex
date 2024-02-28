@@ -5,9 +5,7 @@ defmodule M do
     {k, c, n |> Enum.join() |> String.to_integer(), dst}
   end
 
-  defp compute("A", _, workflows) do
-    workflows |> Map.values() |> Enum.sum()
-  end
+  defp compute("A", _, workflows), do: workflows |> Map.values() |> Enum.sum()
 
   defp compute("R", _, _), do: 0
 

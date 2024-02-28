@@ -11,9 +11,7 @@ defmodule M do
 
   defp compute("R", _, _), do: 0
 
-  defp compute([s], workflows, ratings) do
-    compute(workflows[s], workflows, ratings)
-  end
+  defp compute([s], workflows, ratings), do: compute(workflows[s], workflows, ratings)
 
   defp compute([{k, c, n, s} | t], workflows, ratings) do
     {x0, x1} = ratings[k]
